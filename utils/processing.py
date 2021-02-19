@@ -1,4 +1,3 @@
-from dateutil.relativedelta import relativedelta
 from datetime import *
 from bs4 import BeautifulSoup
 import requests

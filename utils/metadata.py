@@ -27,7 +27,7 @@ def ao3_metadata(query):
 
         if ao3_id == 2:
             result = {
-                'status': 'Fanfiction not found. Check if the name is correct. Try using the fullname if you are using the short name'
+                'status': "Fanfiction not found. Check if the name is correct. Try using the fullname if you aren't already"
             }
             return result
 
