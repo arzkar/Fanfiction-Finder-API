@@ -7,7 +7,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {'API': 'Fanfiction Finder', 'Author': 'RogueOne'}
+    return {'API': 'Fanfiction Finder', 'Author': 'arzkar'}
 
 
 @app.get("/search/{fic_name}")
@@ -17,5 +17,4 @@ def get_fic(fic_name: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=5000,
-                log_level="info", reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=5000)
