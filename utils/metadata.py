@@ -14,11 +14,21 @@ def ao3_metadata(query):
         ao3_id = get_ao3_id(query)
 
         if not ao3_id:
-            result = None
+            result = result = {
+                'status': 'Connection Error'
+            }
             return result
 
         if ao3_id == 1:
-            result = None
+            result = {
+                'status': 'Connection Error'
+            }
+            return result
+
+        if ao3_id == 2:
+            result = {
+                'status': 'Fanfiction not found. Check if the name is correct. Try using the fullname if you are using the short name'
+            }
             return result
 
         # if its an ao3 series, get_ao3_id will return the ao3 series url
@@ -112,18 +122,24 @@ def ffn_metadata(query):
     if re.search(r"https?:\/\/(www/.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*", query) is None:
 
         if re.search(r"ao3\b", query):
-            result = None
+            result = {
+                'status': 'Connection Error'
+            }
             return result
 
         query = query.replace(" ", "+")
         ffn_id = get_ffn_id(query)
 
         if not ffn_id:
-            result = None
+            result = result = {
+                'status': 'Connection Error'
+            }
             return result
 
         if ffn_id == 1:
-            result = None
+            result = result = {
+                'status': 'Connection Error'
+            }
             return result
 
         ffn_url = "https://www.fanfiction.net/s/"+''.join(ffn_id)
@@ -172,6 +188,7 @@ def ffn_metadata(query):
         }
 
     except IndexError:
-        result = None
-
+        result = result = {
+            'status': 'Connection Error'
+        }
     return result
