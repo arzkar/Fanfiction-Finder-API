@@ -45,8 +45,12 @@ def get_ao3_id(query):
         ao3_page = requests.get(ao3_url.group(0))
         ao3_soup = BeautifulSoup(ao3_page.content, 'html.parser')
 
-        ao3_list_clean = (ao3_soup.find(
-            'li', attrs={'class': 'share'}).find('a', href=True))['href']
+        try:
+            ao3_list_clean = (ao3_soup.find(
+                'li', attrs={'class': 'share'}).find('a', href=True))['href']
+        except Exception:
+            ao3_id = 2
+            return ao3_id
 
         for i in range(len(ao3_list_clean)):
             if "/" in ao3_list_clean[i]:
@@ -85,6 +89,8 @@ def get_ffn_id(query):
         page = requests.get(url)
     except Exception:
         ffn_id = 1
+        return ffn_id
+
     soup = BeautifulSoup(page.content, 'html.parser')
     found = soup.findAll('a')
 
