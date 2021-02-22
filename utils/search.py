@@ -9,11 +9,8 @@ def get_ao3_url(query):
 
     url = 'https://www.google.com/search?q=' + \
         query+"+ao3"
-    try:
-        page = requests.get(url)
-    except Exception:
-        ao3_id = 1
-        return ao3_id
+
+    page = requests.get(url)
 
     soup = BeautifulSoup(page.content, 'html.parser')
     found = soup.findAll('a')
@@ -48,11 +45,7 @@ def get_ffn_url(query):
     url = 'https://www.google.com/search?q=' + \
         query+"+fanfiction"
 
-    try:
-        page = requests.get(url)
-    except Exception:
-        ffn_id = 1
-        return ffn_id
+    page = requests.get(url)
 
     soup = BeautifulSoup(page.content, 'html.parser')
     found = soup.findAll('a')
