@@ -77,7 +77,12 @@ def ffn_metadata(query):
     ffn_url = get_ffn_url(query)
 
     # Replace cloudscraper with requests if ffnet cloudflare issue is resolved
-    scraper = cloudscraper.create_scraper(browser='chrome')
+    scraper = cloudscraper.create_scraper(browser={
+        'browser': 'chrome',
+        'platform': 'windows',
+        'mobile': False,
+        'desktop': True,
+    })
     ffn_page = scraper.get(ffn_url).text
     ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
 
