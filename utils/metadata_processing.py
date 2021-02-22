@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
 import requests
-import re
 from utils.processing import ao3_story_chapter_clean, get_ao3_series_works_index
 
 
@@ -59,19 +58,30 @@ def ao3_metadata_works(ao3_url):
     ao3_story_fandom = (ao3_soup.find(
         'dd', attrs={'class': 'fandom tags'}).find('a').contents[0]).strip()
 
-    ao3_story_relationships = [
-        a.contents[0].strip()
-        for a in ao3_soup.find(
-            'dd', attrs={'class': 'relationship tags'}).find_all('a')
-    ]
+    try:  # not found in every story
+        ao3_story_relationships = [
+            a.contents[0].strip()
+            for a in ao3_soup.find(
+                'dd', attrs={'class': 'relationship tags'}).find_all('a')
+        ]
+        ao3_story_relationships = ", ".join(ao3_story_relationships)
 
-    ao3_story_characters = [
-        a.contents[0].strip()
-        for a in ao3_soup.find(
-            'dd', attrs={'class': 'character tags'}).find_all('a')
-    ]
+    except AttributeError:
+        ao3_story_relationships = "Not Found"
 
-    try:
+    try:  # not found in every story
+        ao3_story_characters = [
+            a.contents[0].strip()
+            for a in ao3_soup.find(
+                'dd', attrs={'class': 'character tags'}).find_all('a')
+        ]
+
+        ao3_story_characters = ", ".join(ao3_story_characters)
+
+    except AttributeError:
+        ao3_story_characters = "Not Found"
+
+    try:  # not found in every story
         ao3_story_additional_tags = [
             a.contents[0].strip()
             for a in ao3_soup.find(
@@ -106,11 +116,6 @@ def ao3_metadata_works(ao3_url):
     ao3_story_chapters = ao3_story_chapter_clean(ao3_story_chapters)
 
     ao3_author_url = "https://archiveofourown.org"+ao3_author_url
-    ao3_story_summary = re.sub(
-        r'\s+', ' ', ao3_story_summary)  # removing whitespaces
-
-    ao3_story_characters = ", ".join(ao3_story_characters)
-    ao3_story_relationships = ", ".join(ao3_story_relationships)
 
     return ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, ao3_story_status, ao3_story_last_up, ao3_story_published, ao3_story_length, ao3_story_chapters, ao3_story_rating, ao3_story_fandom, ao3_story_relationships, ao3_story_characters, ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, ao3_story_bookmarks, ao3_story_comments, ao3_story_hits
 
