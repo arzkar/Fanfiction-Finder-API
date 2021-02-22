@@ -166,9 +166,19 @@ def get_ao3_series_works_index(ao3_soup):
     for i in ao3_series_works_html_h4:
         ao3_series_works_html += str(i)
 
+    ao3_series_works_index = {}
     soup_work = BeautifulSoup(ao3_series_works_html, 'html.parser')
+    cnt = 0
     for tag in soup_work.findAll('a', {'href': re.compile('/works/')}):
-        ao3_series_works_index.append(
-            "['"+tag.text+"','https://archiveofourown.org"+tag['href']+"']")
+        ao3_series_works_index.update(
+            {cnt:
+             [tag.text,
+              "https://archiveofourown.org" +
+              tag['href']
+              ]
+             }
+        )
+
+        cnt += 1
 
     return ao3_series_works_index
