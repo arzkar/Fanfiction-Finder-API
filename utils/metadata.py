@@ -2,78 +2,32 @@ import re
 from bs4 import BeautifulSoup
 import cloudscraper
 
-from utils.search import get_ao3_id, get_ffn_id
+from utils.search import get_ao3_url, get_ffn_url
 from utils.processing import ffn_process_details, ao3_convert_chapters_to_works
 from utils.metadata_processing import ao3_metadata_works, ao3_metadata_series
 
 
 def ao3_metadata(query):
-    if re.search(r"https?:\/\/(www/.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*", query) is None:
 
-        query = query.replace(" ", "+")
-        ao3_id = get_ao3_id(query)
+    query = query.replace(" ", "+")
+    ao3_url = get_ao3_url(query)
 
-        if not ao3_id:
-            result = result = {
-                'status': 'Connection Error'
-            }
-            return result
+    if re.search(r"/chapters/\b", ao3_url) is not None:
 
-        if ao3_id == 1:
-            result = {
-                'status': 'Connection Error'
-            }
-            return result
-
-        if ao3_id == 2:
-            result = {
-                'status': "Fanfiction not found. Check if the name is correct. Try using the fullname if you aren't already"
-            }
-            return result
-
-        # if its an ao3 series, get_ao3_id will return the ao3 series url
-        if re.search(r"https?:\/\/(www/.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*", ao3_id) is not None:
-            ao3_url = ao3_id  # ao3_url was returned inplace of ao3_id
-            ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, ao3_series_status, ao3_series_last_up, ao3_series_begun, ao3_series_length, ao3_series_works_index, ao3_series_works, ao3_series_bookmarks = ao3_metadata_series(
-                ao3_url)
-
-            result = {
-                'series': ao3_series_name,
-                'series_url': ao3_url,
-                'author': ao3_author_name,
-                'author_url': ao3_author_url,
-                'series_summary': ao3_series_summary,
-                'series_status': ao3_series_status,
-                'series_last_updated': ao3_series_last_up,
-                'series_begun': ao3_series_begun,
-                'series_length': ao3_series_length,
-                'series_total_works': ao3_series_works,
-                'series_works_index': ao3_series_works_index,
-                'series_bookmarks': ao3_series_bookmarks
-            }
-
-            return result
-        else:
-            ao3_url = "https://archiveofourown.org/works/"+''.join(ao3_id)
-
-    else:  # if the query was ao3 url, not get_fic_id needed
-        ao3_url = re.search(
-            r"((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*\b", query)
-        ao3_url = ao3_url.group()
-
-    if re.search(r"archiveofourown.org/works/\b", ao3_url) is not None:
-        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, ao3_story_status, ao3_story_last_up, ao3_story_published, ao3_story_length, ao3_story_chapters, ao3_story_rating, ao3_story_fandom, ao3_story_relationships, ao3_story_characters, ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, ao3_story_bookmarks, ao3_story_comments, ao3_story_hits = ao3_metadata_works(
-            ao3_url)
-
-    elif re.search(r"archiveofourown.org/chapters/\b", ao3_url) is not None:
         ao3_url = ao3_convert_chapters_to_works(
             ao3_url)  # convert the url from /chapters/ to /works/
 
         ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, ao3_story_status, ao3_story_last_up, ao3_story_published, ao3_story_length, ao3_story_chapters, ao3_story_rating, ao3_story_fandom, ao3_story_relationships, ao3_story_characters, ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, ao3_story_bookmarks, ao3_story_comments, ao3_story_hits = ao3_metadata_works(
             ao3_url)
 
-    elif re.search(r"archiveofourown.org/series/\b", ao3_url) is not None:
-        ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, ao3_series_status, ao3_series_last_up, ao3_series_length, ao3_series_works_index, ao3_series_works, ao3_series_bookmarks = ao3_metadata_series(
+    elif re.search(r"/works/\b", ao3_url) is not None:
+
+        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, ao3_story_status, ao3_story_last_up, ao3_story_published, ao3_story_length, ao3_story_chapters, ao3_story_rating, ao3_story_fandom, ao3_story_relationships, ao3_story_characters, ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, ao3_story_bookmarks, ao3_story_comments, ao3_story_hits = ao3_metadata_works(
+            ao3_url)
+
+    elif re.search(r"/series/\b", ao3_url) is not None:
+
+        ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, ao3_series_status, ao3_series_last_up, ao3_series_begun, ao3_series_length, ao3_series_works_index, ao3_series_works, ao3_series_bookmarks = ao3_metadata_series(
             ao3_url)
 
         result = {
@@ -119,32 +73,8 @@ def ao3_metadata(query):
 
 def ffn_metadata(query):
 
-    if re.search(r"https?:\/\/(www/.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_\+.~#?&//=]*", query) is None:
-
-        if re.search(r"ao3\b", query):
-            result = {
-                'status': 'Connection Error'
-            }
-            return result
-
-        query = query.replace(" ", "+")
-        ffn_id = get_ffn_id(query)
-
-        if not ffn_id:
-            result = result = {
-                'status': 'Connection Error'
-            }
-            return result
-
-        if ffn_id == 1:
-            result = result = {
-                'status': 'Connection Error'
-            }
-            return result
-
-        ffn_url = "https://www.fanfiction.net/s/"+''.join(ffn_id)
-    else:  # if the query was ffn url, not get_fic_id needed
-        ffn_url = query
+    query = query.replace(" ", "+")
+    ffn_url = get_ffn_url(query)
 
     # Replace cloudscraper with requests if ffnet cloudflare issue is resolved
     scraper = cloudscraper.create_scraper(browser='chrome')
@@ -191,7 +121,7 @@ def ffn_metadata(query):
         }
 
     except IndexError:
-        result = result = {
+        result = {
             'status': 'Connection Error'
         }
     return result

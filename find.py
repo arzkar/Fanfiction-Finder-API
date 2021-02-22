@@ -14,12 +14,14 @@ def find_fic(message):
     if all(elem in whitelist for elem in msg):  # if msg in whitelist
         if re.search(r"^ao3\b", message.lower()) is not None:
             msg = message.replace("ao3", "")
+            msg = message.replace("ffn", "")
             result = ao3_metadata(msg)
 
             return result
 
         elif re.search(r"^ffn\b", message.lower()) is not None:
             msg = message.replace("ffn", "")
+            msg = message.replace("ao3", "")
             result = ffn_metadata(msg)
 
             return result
