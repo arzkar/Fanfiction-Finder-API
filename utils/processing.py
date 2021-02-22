@@ -32,11 +32,15 @@ def ffn_process_details(ffn_soup):
     ffn_story_reviews, ffn_story_favs, ffn_story_follows, ffn_story_rating = get_ffn_reviews_favs_follows(
         details)
 
+    ffn_story_lang = details[1]
+    ffn_story_genre = details[2]
+    ffn_story_characters = details[3]
+
     ffn_story_length = get_ffn_word_cnt(details)
     ffn_story_length = "{:,}".format(int(ffn_story_length))
     ffn_story_chapters = str(get_ffn_chapters_cnt(details)).strip()
 
-    return ffn_story_status, ffn_story_last_up, ffn_story_published, ffn_story_length, ffn_story_chapters, ffn_story_reviews, ffn_story_favs, ffn_story_follows, ffn_story_rating
+    return ffn_story_status, ffn_story_last_up, ffn_story_published, ffn_story_length, ffn_story_chapters, ffn_story_reviews, ffn_story_favs, ffn_story_follows, ffn_story_rating, ffn_story_lang, ffn_story_genre, ffn_story_characters
 
 
 def get_ffn_story_status(ffn_soup, details):

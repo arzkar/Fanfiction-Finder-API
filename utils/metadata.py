@@ -147,7 +147,7 @@ def ffn_metadata(query):
         ffn_url = query
 
     # Replace cloudscraper with requests if ffnet cloudflare issue is resolved
-    scraper = cloudscraper.create_scraper()
+    scraper = cloudscraper.create_scraper(browser='chrome')
     ffn_page = scraper.get(ffn_url).text
     ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
 
@@ -165,7 +165,7 @@ def ffn_metadata(query):
             'style': 'margin-top:2px',
             'class': 'xcontrast_txt'})[0].string.strip()
 
-        ffn_story_status, ffn_story_last_up, ffn_story_published, ffn_story_length, ffn_story_chapters, ffn_story_reviews, ffn_story_favs, ffn_story_follows, ffn_story_rating = ffn_process_details(
+        ffn_story_status, ffn_story_last_up, ffn_story_published, ffn_story_length, ffn_story_chapters, ffn_story_reviews, ffn_story_favs, ffn_story_follows, ffn_story_rating, ffn_story_lang, ffn_story_genre, ffn_story_characters = ffn_process_details(
             ffn_soup)
 
         ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
@@ -177,6 +177,9 @@ def ffn_metadata(query):
             'author_url': ffn_author_url,
             'story_summary': ffn_story_summary,
             'story_rating': ffn_story_rating,
+            'story_language': ffn_story_lang,
+            'story_genre': ffn_story_genre,
+            'story_characters': ffn_story_characters,
             'story_status': ffn_story_status,
             'story_last_updated': ffn_story_last_up,
             'story_published': ffn_story_published,
