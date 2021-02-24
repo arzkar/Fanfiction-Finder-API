@@ -31,7 +31,7 @@ def ao3_metadata(query):
             ao3_url)
 
         result = {
-            'series': ao3_series_name,
+            'series_name': ao3_series_name,
             'series_url': ao3_url,
             'author': ao3_author_name,
             'author_url': ao3_author_url,
@@ -106,7 +106,7 @@ def ffn_metadata(query):
         ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
 
         result = {
-            'title': ffn_story_name,
+            'story_name': ffn_story_name,
             'story_url': ffn_url,
             'author': ffn_author_name,
             'author_url': ffn_author_url,
