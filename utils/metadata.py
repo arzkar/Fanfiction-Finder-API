@@ -76,13 +76,13 @@ def ffn_metadata(query):
     query = query.replace(" ", "+")
     ffn_url = get_ffn_url(query)
 
-    # Replace cloudscraper with requests if ffnet cloudflare issue is resolved
-    scraper = cloudscraper.create_scraper(browser={
+    scraper = cloudscraper.CloudScraper(delay=2, browser={
         'browser': 'chrome',
         'platform': 'windows',
         'mobile': False,
         'desktop': True,
     })
+
     ffn_page = scraper.get(ffn_url).text
     ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
 

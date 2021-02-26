@@ -1,4 +1,5 @@
 import re
+import time
 
 from utils.metadata import ao3_metadata, ffn_metadata
 
@@ -15,13 +16,13 @@ def find_fic(message):
         if re.search(r"^ao3\b", message.lower()) is not None:
             msg = message.replace("ao3", "")
             msg = message.replace("ffn", "")
-            result = ao3_metadata(msg)
 
+            time.sleep(2)
+            result = ao3_metadata(msg)
             return result
 
         elif re.search(r"^ffn\b", message.lower()) is not None:
             msg = message.replace("ffn", "")
             msg = message.replace("ao3", "")
             result = ffn_metadata(msg)
-
             return result
