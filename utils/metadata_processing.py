@@ -112,12 +112,24 @@ def ao3_metadata_works(ao3_url):
         'dl', attrs={'class': 'stats'}).find(
         'dd', attrs={'class': 'hits'}).contents[0]).strip()
 
+    ao3_story_warnings = (ao3_soup.find(
+        'dd', attrs={'class': 'warning tags'}).find('a').contents[0]).strip()
+
+    ao3_story_category = (ao3_soup.find(
+        'dd', attrs={'class': 'category tags'}).find('a').contents[0]).strip()
+
     ao3_story_length = "{:,}".format(int(ao3_story_length))
     ao3_story_chapters = ao3_story_chapter_clean(ao3_story_chapters)
 
     ao3_author_url = "https://archiveofourown.org"+ao3_author_url
 
-    return ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, ao3_story_status, ao3_story_last_up, ao3_story_published, ao3_story_length, ao3_story_chapters, ao3_story_rating, ao3_story_fandom, ao3_story_relationships, ao3_story_characters, ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, ao3_story_bookmarks, ao3_story_comments, ao3_story_hits
+    return ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary,\
+        ao3_story_status, ao3_story_last_up, ao3_story_published, \
+        ao3_story_length, ao3_story_chapters, ao3_story_rating, \
+        ao3_story_fandom, ao3_story_relationships, ao3_story_characters,\
+        ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
+        ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
+        ao3_story_warnings, ao3_story_category
 
 
 def ao3_metadata_series(ao3_url):

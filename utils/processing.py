@@ -36,6 +36,9 @@ def ffn_process_details(ffn_soup):
     ffn_story_genre = details[2]
     ffn_story_characters = details[3]
 
+    if re.search(r'\d', str(ffn_story_characters)) is not None:
+        ffn_story_characters = "Not Found"
+
     ffn_story_length = get_ffn_word_cnt(details)
     ffn_story_length = "{:,}".format(int(ffn_story_length))
     ffn_story_chapters = str(get_ffn_chapters_cnt(details)).strip()
