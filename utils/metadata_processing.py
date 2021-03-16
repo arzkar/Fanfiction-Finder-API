@@ -1,9 +1,13 @@
 from bs4 import BeautifulSoup
 import requests
+import time
 from utils.processing import ao3_story_chapter_clean, get_ao3_series_works_index
 
 
 def ao3_metadata_works(ao3_url):
+
+    time.sleep(2)
+
     ao3_page = requests.get(ao3_url)
     ao3_soup = BeautifulSoup(ao3_page.content, 'html.parser')
 
@@ -133,6 +137,9 @@ def ao3_metadata_works(ao3_url):
 
 
 def ao3_metadata_series(ao3_url):
+
+    time.sleep(2)
+
     ao3_page = requests.get(ao3_url)
     ao3_soup = BeautifulSoup(ao3_page.content, 'html.parser')
 

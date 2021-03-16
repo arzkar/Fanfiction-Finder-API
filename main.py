@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
 from find import find_fic
 import uvicorn
 
-app = FastAPI()
+app = FastAPI(docs_url=None, redoc_url=None)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 
 @app.get("/")

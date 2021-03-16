@@ -1,6 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 import cloudscraper
+import time
 
 from utils.search import get_ao3_url, get_ffn_url
 from utils.processing import ffn_process_details, ao3_convert_chapters_to_works
@@ -45,6 +46,11 @@ def ao3_metadata(query):
             ao3_series_bookmarks = ao3_metadata_series(
                 ao3_url)
 
+        # remove everything after &sa from the url
+        if re.search(r"^(.*?)&", ao3_url) is not None:
+            ao3_url = re.search(
+                r"^(.*?)&", ao3_url).group(1)
+
         result = {
             'series_name': ao3_series_name,
             'series_url': ao3_url,
@@ -61,12 +67,17 @@ def ao3_metadata(query):
         }
         return result
 
+    # remove everything after &sa from the url
+    if re.search(r"^(.*?)&", ao3_url) is not None:
+        ao3_url = re.search(
+            r"^(.*?)&", ao3_url).group(1)
+
     result = {
         'story_name': ao3_story_name,
         'story_url': ao3_url,
         'author': ao3_author_name,
         'author_url': ao3_author_url,
-        'story_warnings': ao3_story_warningss,
+        'story_warnings': ao3_story_warnings,
         'story_category': ao3_story_category,
         'story_fandom': ao3_story_fandom,
         'story_relationships': ao3_story_relationships,
@@ -93,13 +104,14 @@ def ffn_metadata(query):
     query = query.replace(" ", "+")
     ffn_url = get_ffn_url(query)
 
-    scraper = cloudscraper.CloudScraper(delay=2, browser={
+    scraper = cloudscraper.CloudScraper(delay=3, browser={
         'browser': 'chrome',
         'platform': 'windows',
         'mobile': False,
         'desktop': True,
     })
 
+    time.sleep(2)
     ffn_page = scraper.get(ffn_url).text
     ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
 
@@ -124,6 +136,11 @@ def ffn_metadata(query):
                 ffn_soup)
 
         ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
+
+        # remove everything after &sa from the url
+        if re.search(r"^(.*?)&", ffn_url) is not None:
+            ffn_url = re.search(
+                r"^(.*?)&", ffn_url).group(1)
 
         result = {
             'story_name': ffn_story_name,
