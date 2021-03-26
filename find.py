@@ -21,14 +21,12 @@ def find_fic(query):
 
             time.sleep(2)
             result = ao3_metadata(msg)
-
             return result
 
         elif re.search(r"^ffn\b", query, re.IGNORECASE) is not None:
             msg = query.replace("ffn", "")
             msg = query.replace("ao3", "")
             result = ffn_metadata(msg)
-
             return result
 
         elif re.search(URL_VALIDATE, query) is not None:

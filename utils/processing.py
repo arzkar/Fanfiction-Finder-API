@@ -36,6 +36,9 @@ def ffn_process_details(ffn_soup):
     ffn_story_genre = details[2]
     ffn_story_characters = details[3]
 
+    if re.search(r'\d', str(ffn_story_characters)) is not None:
+        ffn_story_characters = "Not Found"
+
     ffn_story_length = get_ffn_word_cnt(details)
     ffn_story_length = "{:,}".format(int(ffn_story_length))
     ffn_story_chapters = str(get_ffn_chapters_cnt(details)).strip()
@@ -54,15 +57,19 @@ def get_ffn_story_status(ffn_soup, details):
             ffn_story_last_up = str(date.fromtimestamp(
                 int(dates[0]['data-xutime'])))
 
-            break  # if found, exit the loop to prevent overwriting of the variable
-
-        else:
-            cnt = 2
-            ffn_story_last_up = str(date.fromtimestamp(
+            ffn_story_published = str(date.fromtimestamp(
                 int(dates[1]['data-xutime'])))  # Published date
 
-    ffn_story_published = str(date.fromtimestamp(
-        int(dates[1]['data-xutime'])))  # Published date
+            break  # if found, exit the loop to prevent overwriting of the variable
+
+        elif details[i].startswith('Published:'):
+            cnt = 2
+            ffn_story_last_up = str(date.fromtimestamp(
+                int(dates[0]['data-xutime'])))  # Published date
+
+            # if Updated not found, pub & last_up will be same
+            ffn_story_published = str(date.fromtimestamp(
+                int(dates[0]['data-xutime'])))  # Published date
 
     if cnt == 1:
         return "Not Completed", ffn_story_last_up, ffn_story_published
@@ -125,7 +132,7 @@ def get_ffn_word_cnt(details):
 def get_ffn_chapters_cnt(details):
     search = [x for x in details if x.startswith("Chapters:")]
     if len(search) == 0:
-        return 0
+        return 1  # 1 as the default chapter number
     return int(search[0][len("Chapters:"):].replace(',', ''))
 
 

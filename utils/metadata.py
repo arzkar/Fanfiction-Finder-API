@@ -1,6 +1,7 @@
 import re
 from bs4 import BeautifulSoup
 import cloudscraper
+import time
 
 from utils.search import get_ao3_url, get_ffn_url
 from utils.processing import ffn_process_details, ao3_convert_chapters_to_works
@@ -25,20 +26,22 @@ def ao3_metadata(query):
 
         ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, \
             ao3_story_status, ao3_story_last_up, ao3_story_published, \
-            ao3_story_length, ao3_story_chapters, ao3_story_rating, \
+            ao3_story_length, ao3_story_chapters, ao3_story_rating,\
             ao3_story_fandom, ao3_story_relationships, ao3_story_characters, \
             ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
-            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits = ao3_metadata_works(
+            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
+            ao3_story_warnings, ao3_story_category = ao3_metadata_works(
                 ao3_url)
 
     elif re.search(r"/works/\b", ao3_url) is not None:
 
-        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, \
+        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary,\
             ao3_story_status, ao3_story_last_up, ao3_story_published, \
             ao3_story_length, ao3_story_chapters, ao3_story_rating, \
             ao3_story_fandom, ao3_story_relationships, ao3_story_characters, \
             ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
-            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits = ao3_metadata_works(
+            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
+            ao3_story_warnings, ao3_story_category = ao3_metadata_works(
                 ao3_url)
 
     elif re.search(r"/series/\b", ao3_url) is not None:
@@ -55,7 +58,7 @@ def ao3_metadata(query):
                 r"^(.*?)&", ao3_url).group(1)
 
         result = {
-            'series': ao3_series_name,
+            'series_name': ao3_series_name,
             'series_url': ao3_url,
             'author': ao3_author_name,
             'author_url': ao3_author_url,
@@ -72,11 +75,18 @@ def ao3_metadata(query):
         }
         return result
 
+    # remove everything after &sa from the url
+    if re.search(r"^(.*?)&", ao3_url) is not None:
+        ao3_url = re.search(
+            r"^(.*?)&", ao3_url).group(1)
+
     result = {
         'story_name': ao3_story_name,
         'story_url': ao3_url,
         'author': ao3_author_name,
         'author_url': ao3_author_url,
+        'story_warnings': ao3_story_warnings,
+        'story_category': ao3_story_category,
         'story_fandom': ao3_story_fandom,
         'story_relationships': ao3_story_relationships,
         'story_characters': ao3_story_characters,
@@ -110,8 +120,14 @@ def ffn_metadata(query):
         ffn_url = re.search(
             URL_VALIDATE, query).group(0)
 
-    # Replace cloudscraper with requests if ffnet cloudflare issue is resolved
-    scraper = cloudscraper.create_scraper(browser='chrome')
+    scraper = cloudscraper.CloudScraper(delay=3, browser={
+        'browser': 'chrome',
+        'platform': 'windows',
+        'mobile': False,
+        'desktop': True,
+    })
+
+    time.sleep(2)
     ffn_page = scraper.get(ffn_url).text
     ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
 
@@ -142,6 +158,11 @@ def ffn_metadata(query):
         ffn_story_id = re.search(r"\d+", ffn_url).group(0)
         ffn_author_id = re.search(r"\d+", ffn_author_url).group(0)
         ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
+
+        # remove everything after &sa from the url
+        if re.search(r"^(.*?)&", ffn_url) is not None:
+            ffn_url = re.search(
+                r"^(.*?)&", ffn_url).group(1)
 
         result = {
             'story_id': ffn_story_id,
