@@ -147,12 +147,8 @@ def ao3_metadata_series(ao3_url):
         'div', attrs={'class': 'series-show region'}).find(
         'h2', attrs={'class': 'heading'}).contents[0]).strip()
 
-    ao3_author_name = (ao3_soup.find(
-        'div', attrs={'class': 'series-show region'}).find(
-        'a', attrs={'rel': 'author'}).contents[0]).strip()
-
-    ao3_author_url = ao3_soup.find('div', attrs={'class': 'series-show region'}).find(
-        'dt', text='Creator:').findNext('dd').find('a', href=True)['href']
+    ao3_author_name_list = ao3_soup.find(
+        'dl', attrs={'class': 'series meta group'}).find('dd').find_all('a')
 
     ao3_series_summary = (ao3_soup.find(
         'div', attrs={'class': 'series-show region'}).find(
@@ -164,12 +160,12 @@ def ao3_metadata_series(ao3_url):
             'dt', text='Complete:').findNext(
             'dd')).string.strip()
         if ao3_series_status == "No":
-            ao3_series_status = "Not Completed"
+            ao3_series_status = "Not Complete"
         elif ao3_series_status == "Yes":
             ao3_series_status = "Completed"
 
     except AttributeError:  # if story status not found
-        ao3_series_status = "Completed"
+        ao3_series_status = None
 
     try:
         ao3_series_last_up = ao3_soup.find(
@@ -200,8 +196,19 @@ def ao3_metadata_series(ao3_url):
         'dt', text='Bookmarks:').findNext(
         'dd').string.strip()
 
-    ao3_series_works_index = get_ao3_series_works_index(ao3_soup)
+    ao3_series_fandom, ao3_series_works_index = get_ao3_series_works_index(
+        ao3_soup)
+
+    ao3_author_name = []
+    for author in ao3_author_name_list:
+        ao3_author_name.append(author.string.strip())
+    ao3_author_name = ", ".join(ao3_author_name)
+
+    ao3_author_url = []
+    for author in ao3_author_name_list:
+        ao3_author_url.append(author['href'])
+    ao3_author_url = ", ".join(ao3_author_url)
 
     ao3_author_url = "https://archiveofourown.org"+ao3_author_url
 
-    return ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, ao3_series_status, ao3_series_last_up, ao3_series_begun, ao3_series_length, ao3_series_works_index, ao3_series_works, ao3_series_bookmarks
+    return ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, ao3_series_status, ao3_series_last_up, ao3_series_begun, ao3_series_length, ao3_series_works_index, ao3_series_works, ao3_series_bookmarks, ao3_series_fandom
