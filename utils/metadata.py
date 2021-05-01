@@ -5,7 +5,7 @@ import time
 
 from utils.search import get_ao3_url, get_ffn_url
 from utils.processing import ffn_process_details, ao3_convert_chapters_to_works
-from utils.metadata_processing import ao3_metadata_works, ao3_metadata_series
+from utils.ao3_metadata_processing import ao3_metadata_works, ao3_metadata_series
 
 URL_VALIDATE = r"(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:/[^\s]*)?"
 
@@ -57,7 +57,10 @@ def ao3_metadata(query):
             ao3_url = re.search(
                 r"^(.*?)&", ao3_url).group(1)
 
+        ao3_series_id = (re.search(r"\d+", ao3_url)).group(0)
+
         result = {
+            'series_id': ao3_series_id,
             'series_name': ao3_series_name,
             'series_url': ao3_url,
             'author': ao3_author_name,
@@ -80,7 +83,10 @@ def ao3_metadata(query):
         ao3_url = re.search(
             r"^(.*?)&", ao3_url).group(1)
 
+    ao3_story_id = (re.search(r"\d+", ao3_url)).group(0)
+
     result = {
+        'story_id': ao3_story_id,
         'story_name': ao3_story_name,
         'story_url': ao3_url,
         'author': ao3_author_name,
