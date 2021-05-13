@@ -12,7 +12,7 @@ mccabe==0.6.1
 pip==20.3.3
 pip-autoremove==0.9.1
 pycodestyle==2.6.0
-pydantic==1.7.3
+pydantic==1.7.4
 pyflakes==2.2.0
 pyparsing==2.4.7
 python-dateutil==2.8.1
