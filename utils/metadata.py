@@ -4,7 +4,7 @@ import cloudscraper
 import time
 
 from utils.search import get_ao3_url, get_ffn_url
-from utils.processing import ffn_process_details, ao3_convert_chapters_to_works
+from utils.processing import ffn_process_details
 from utils.ao3_metadata_processing import ao3_metadata_works, ao3_metadata_series
 
 URL_VALIDATE = r"(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:/[^\s]*)?"
@@ -19,32 +19,26 @@ def ao3_metadata(query):
     else:  # clean the url if the query contains a url
         ao3_url = re.search(URL_VALIDATE, query).group(0)
 
-    if re.search(r"/chapters/\b", ao3_url) is not None:
+    if re.search(r"/works/\b", ao3_url) is not None:
 
-        ao3_url = ao3_convert_chapters_to_works(
-            ao3_url)  # convert the url from /chapters/ to /works/
+        # extract work id from the url
+        ao3_work_id = str(re.search(r"\d+", ao3_url).group(0))
+        ao3_url = "https://archiveofourown.org/works/"+ao3_work_id
 
-        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary, \
-            ao3_story_status, ao3_story_last_up, ao3_story_published, \
-            ao3_story_length, ao3_story_chapters, ao3_story_rating,\
-            ao3_story_fandom, ao3_story_relationships, ao3_story_characters, \
-            ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
-            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
-            ao3_story_warnings, ao3_story_category = ao3_metadata_works(
-                ao3_url)
-
-    elif re.search(r"/works/\b", ao3_url) is not None:
-
-        ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary,\
-            ao3_story_status, ao3_story_last_up, ao3_story_published, \
-            ao3_story_length, ao3_story_chapters, ao3_story_rating, \
-            ao3_story_fandom, ao3_story_relationships, ao3_story_characters, \
-            ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
-            ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
-            ao3_story_warnings, ao3_story_category = ao3_metadata_works(
+        ao3_work_name, ao3_author_name, ao3_author_url, ao3_work_summary,\
+            ao3_work_status, ao3_work_last_up, ao3_work_published, \
+            ao3_work_length, ao3_work_chapters, ao3_work_rating, \
+            ao3_work_fandom, ao3_work_relationships, ao3_work_characters, \
+            ao3_work_additional_tags, ao3_work_language, ao3_work_kudos, \
+            ao3_work_bookmarks, ao3_work_comments, ao3_work_hits, \
+            ao3_work_warnings, ao3_work_category = ao3_metadata_works(
                 ao3_url)
 
     elif re.search(r"/series/\b", ao3_url) is not None:
+
+        # extract series id from the url
+        ao3_series_id = str(re.search(r"\d+", ao3_url).group(0))
+        ao3_url = "https://archiveofourown.org/series/"+ao3_series_id
 
         ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, \
             ao3_series_status, ao3_series_last_up, ao3_series_begun, \
@@ -83,32 +77,32 @@ def ao3_metadata(query):
         ao3_url = re.search(
             r"^(.*?)&", ao3_url).group(1)
 
-    ao3_story_id = (re.search(r"\d+", ao3_url)).group(0)
+    ao3_work_id = (re.search(r"\d+", ao3_url)).group(0)
 
     result = {
-        'story_id': ao3_story_id,
-        'story_name': ao3_story_name,
+        'story_id': ao3_work_id,
+        'story_name': ao3_work_name,
         'story_url': ao3_url,
         'author': ao3_author_name,
         'author_url': ao3_author_url,
-        'story_warnings': ao3_story_warnings,
-        'story_category': ao3_story_category,
-        'story_fandom': ao3_story_fandom,
-        'story_relationships': ao3_story_relationships,
-        'story_characters': ao3_story_characters,
-        'story_additional_tags': ao3_story_additional_tags,
-        'story_language': ao3_story_language,
-        'story_summary': ao3_story_summary,
-        'story_status': ao3_story_status,
-        'story_last_updated': ao3_story_last_up,
-        'story_published': ao3_story_published,
-        'story_length': ao3_story_length,
-        'story_chapters': ao3_story_chapters,
-        'story_rating': ao3_story_rating,
-        'story_kudos': ao3_story_kudos,
-        'story_bookmarks': ao3_story_bookmarks,
-        'story_comments': ao3_story_comments,
-        'story_hits': ao3_story_hits
+        'story_warnings': ao3_work_warnings,
+        'story_category': ao3_work_category,
+        'story_fandom': ao3_work_fandom,
+        'story_relationships': ao3_work_relationships,
+        'story_characters': ao3_work_characters,
+        'story_additional_tags': ao3_work_additional_tags,
+        'story_language': ao3_work_language,
+        'story_summary': ao3_work_summary,
+        'story_status': ao3_work_status,
+        'story_last_updated': ao3_work_last_up,
+        'story_published': ao3_work_published,
+        'story_length': ao3_work_length,
+        'story_chapters': ao3_work_chapters,
+        'story_rating': ao3_work_rating,
+        'story_kudos': ao3_work_kudos,
+        'story_bookmarks': ao3_work_bookmarks,
+        'story_comments': ao3_work_comments,
+        'story_hits': ao3_work_hits
     }
     return result
 

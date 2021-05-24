@@ -1,7 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
 import time
-from utils.processing import ao3_story_chapter_clean, get_ao3_series_works_index
+import re
+from utils.processing import ao3_work_chapter_clean, get_ao3_series_works_index
 
 
 def ao3_metadata_works(ao3_url):
@@ -11,7 +12,7 @@ def ao3_metadata_works(ao3_url):
     ao3_page = requests.get(ao3_url)
     ao3_soup = BeautifulSoup(ao3_page.content, 'html.parser')
 
-    ao3_story_name = (ao3_soup.find(
+    ao3_work_name = (ao3_soup.find(
         'h2', attrs={'class': 'title heading'}).contents[0]).strip()
 
     ao3_author_name = (ao3_soup.find(
@@ -20,120 +21,144 @@ def ao3_metadata_works(ao3_url):
     ao3_author_url = ao3_soup.find(
         'h3', attrs={'class': 'byline heading'}).find('a', href=True)['href']
 
-    ao3_story_summary = ao3_soup.find(
-        'div', attrs={'class': 'summary module'}).find(
-        'blockquote', attrs={'class': 'userstuff'}).text
+    try:
+        ao3_work_summary = ao3_soup.find(
+            'div', attrs={'class': 'summary module'}).find(
+            'blockquote', attrs={'class': 'userstuff'}).text
+    except AttributeError:  # if summary not found
+        ao3_work_summary = ""
+
+    ao3_work_summary = re.sub(
+        r'\s+', ' ', ao3_work_summary)  # removing whitespaces
 
     try:
-        ao3_story_status = (ao3_soup.find(
+        ao3_work_status = (ao3_soup.find(
             'dl', attrs={'class': 'stats'}).find(
             'dt', attrs={'class': 'status'}).contents[0]).strip()
 
-        ao3_story_status = ao3_story_status.replace(":", "")
+        ao3_work_status = ao3_work_status.replace(":", "")
 
     except AttributeError:  # if story status not found
-        ao3_story_status = "Completed"
+        ao3_work_status = "Completed"
 
     try:
-        ao3_story_last_up = (ao3_soup.find(
+        ao3_work_last_up = (ao3_soup.find(
             'dl', attrs={'class': 'stats'}).find(
             'dd', attrs={'class': 'status'}).contents[0]).strip()
 
     except AttributeError:  # if story last updated not found
-        ao3_story_last_up = (ao3_soup.find(
+        ao3_work_last_up = (ao3_soup.find(
             'dl', attrs={'class': 'stats'}).find(
             'dd', attrs={'class': 'published'}).contents[0]).strip()
 
-    ao3_story_published = (ao3_soup.find(
+    ao3_work_published = (ao3_soup.find(
         'dl', attrs={'class': 'stats'}).find(
         'dd', attrs={'class': 'published'}).contents[0]).strip()
 
-    ao3_story_length = (ao3_soup.find(
+    ao3_work_length = (ao3_soup.find(
         'dl', attrs={'class': 'stats'}).find(
         'dd', attrs={'class': 'words'}).contents[0]).strip()
 
-    ao3_story_chapters = (ao3_soup.find(
+    ao3_work_chapters = (ao3_soup.find(
         'dl', attrs={'class': 'stats'}).find(
         'dd', attrs={'class': 'chapters'}).contents[0]).strip()
 
-    ao3_story_rating = (ao3_soup.find(
-        'dd', attrs={'class': 'rating tags'}).find('a').contents[0]).strip()
+    try:
+        ao3_work_rating = (ao3_soup.find(
+            'dd', attrs={'class': 'rating tags'}).find('a').contents[0]).strip()
 
-    ao3_story_fandom = (ao3_soup.find(
+    except AttributeError:
+        ao3_work_rating = None
+
+    ao3_work_fandom = (ao3_soup.find(
         'dd', attrs={'class': 'fandom tags'}).find('a').contents[0]).strip()
 
     try:  # not found in every story
-        ao3_story_relationships = [
+        ao3_work_relationships = [
             a.contents[0].strip()
             for a in ao3_soup.find(
                 'dd', attrs={'class': 'relationship tags'}).find_all('a')
         ]
-        ao3_story_relationships = ", ".join(ao3_story_relationships)
+        ao3_work_relationships = ", ".join(ao3_work_relationships)
 
     except AttributeError:
-        ao3_story_relationships = "Not Found"
+        ao3_work_relationships = "Not Found"
 
     try:  # not found in every story
-        ao3_story_characters = [
+        ao3_work_characters = [
             a.contents[0].strip()
             for a in ao3_soup.find(
                 'dd', attrs={'class': 'character tags'}).find_all('a')
         ]
 
-        ao3_story_characters = ", ".join(ao3_story_characters)
+        ao3_work_characters = ", ".join(ao3_work_characters)
 
     except AttributeError:
-        ao3_story_characters = "Not Found"
+        ao3_work_characters = "Not Found"
 
     try:  # not found in every story
-        ao3_story_additional_tags = [
+        ao3_work_additional_tags = [
             a.contents[0].strip()
             for a in ao3_soup.find(
                 'dd', attrs={'class': 'freeform tags'}).find_all('a')
         ]
 
-        ao3_story_additional_tags = ", ".join(ao3_story_additional_tags)
+        ao3_work_additional_tags = ", ".join(ao3_work_additional_tags)
 
     except AttributeError:
-        ao3_story_additional_tags = "Not Found"
+        ao3_work_additional_tags = "Not Found"
 
-    ao3_story_language = (ao3_soup.find(
+    ao3_work_language = (ao3_soup.find(
         'dd', attrs={'class': 'language'}).contents[0]).strip()
 
-    ao3_story_kudos = (ao3_soup.find(
-        'dl', attrs={'class': 'stats'}).find(
-        'dd', attrs={'class': 'kudos'}).contents[0]).strip()
+    try:
+        ao3_work_kudos = (ao3_soup.find(
+            'dl', attrs={'class': 'stats'}).find(
+            'dd', attrs={'class': 'kudos'}).contents[0]).strip()
+    except AttributeError:
+        ao3_work_kudos = 0
 
-    ao3_story_bookmarks = (ao3_soup.find(
-        'dl', attrs={'class': 'stats'}).find(
-        'dd', attrs={'class': 'bookmarks'}).find('a').contents[0]).strip()
+    try:
+        ao3_work_bookmarks = (ao3_soup.find(
+            'dl', attrs={'class': 'stats'}).find(
+            'dd', attrs={'class': 'bookmarks'}).find('a').contents[0]).strip()
+    except AttributeError:
+        ao3_work_bookmarks = 0
 
-    ao3_story_comments = (ao3_soup.find(
-        'dl', attrs={'class': 'stats'}).find(
-        'dd', attrs={'class': 'comments'}).contents[0]).strip()
+    try:
+        ao3_work_comments = (ao3_soup.find(
+            'dl', attrs={'class': 'stats'}).find(
+            'dd', attrs={'class': 'comments'}).contents[0]).strip()
 
-    ao3_story_hits = (ao3_soup.find(
-        'dl', attrs={'class': 'stats'}).find(
-        'dd', attrs={'class': 'hits'}).contents[0]).strip()
+    except AttributeError:
+        ao3_work_comments = 0
 
-    ao3_story_warnings = (ao3_soup.find(
+    try:
+        ao3_work_hits = (ao3_soup.find(
+            'dl', attrs={'class': 'stats'}).find(
+            'dd', attrs={'class': 'hits'}).contents[0]).strip()
+
+    except AttributeError:
+        ao3_work_hits = 0
+
+    ao3_work_warnings = (ao3_soup.find(
         'dd', attrs={'class': 'warning tags'}).find('a').contents[0]).strip()
 
-    ao3_story_category = (ao3_soup.find(
+    ao3_work_category = (ao3_soup.find(
         'dd', attrs={'class': 'category tags'}).find('a').contents[0]).strip()
 
-    ao3_story_length = "{:,}".format(int(ao3_story_length))
-    ao3_story_chapters = ao3_story_chapter_clean(ao3_story_chapters)
+    ao3_work_length = "{:,}".format(int(ao3_work_length))
+    ao3_work_chapters = ao3_work_chapter_clean(ao3_work_chapters)
 
     ao3_author_url = "https://archiveofourown.org"+ao3_author_url
 
-    return ao3_story_name, ao3_author_name, ao3_author_url, ao3_story_summary,\
-        ao3_story_status, ao3_story_last_up, ao3_story_published, \
-        ao3_story_length, ao3_story_chapters, ao3_story_rating, \
-        ao3_story_fandom, ao3_story_relationships, ao3_story_characters,\
-        ao3_story_additional_tags, ao3_story_language, ao3_story_kudos, \
-        ao3_story_bookmarks, ao3_story_comments, ao3_story_hits, \
-        ao3_story_warnings, ao3_story_category
+    return ao3_work_name, ao3_author_name, ao3_author_url, ao3_work_summary,\
+        ao3_work_status, ao3_work_last_up, ao3_work_published, \
+        ao3_work_length, ao3_work_chapters, ao3_work_rating, \
+        ao3_work_fandom, ao3_work_relationships, ao3_work_characters,\
+        ao3_work_additional_tags, ao3_work_language, ao3_work_kudos, \
+        ao3_work_bookmarks, ao3_work_comments, ao3_work_hits, \
+        ao3_work_warnings, ao3_work_category
 
 
 def ao3_metadata_series(ao3_url):
