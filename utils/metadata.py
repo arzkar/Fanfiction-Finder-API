@@ -1,11 +1,9 @@
 import re
-from bs4 import BeautifulSoup
-import cloudscraper
-import time
+
 
 from utils.search import get_ao3_url, get_ffn_url
-from utils.processing import ffn_process_details
-from utils.ao3_metadata_processing import ao3_metadata_works, ao3_metadata_series
+from adapters.adapter_archiveofourown import ArchiveOfOurOwn
+from adapters.adapter_fanfictionnet import FanFictionNet
 
 URL_VALIDATE = r"(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:/[^\s]*)?"
 
@@ -19,91 +17,82 @@ def ao3_metadata(query):
     else:  # clean the url if the query contains a url
         ao3_url = re.search(URL_VALIDATE, query).group(0)
 
-    if re.search(r"/works/\b", ao3_url) is not None:
+    if re.search(r"/works/\b", ao3_url):
 
         # extract work id from the url
-        ao3_work_id = str(re.search(r"\d+", ao3_url).group(0))
-        ao3_url = "https://archiveofourown.org/works/"+ao3_work_id
+        ao3_works_id = str(re.search(r"\d+", ao3_url).group(0))
+        ao3_url = "https://archiveofourown.org/works/"+ao3_works_id
 
-        ao3_work_name, ao3_author_name, ao3_author_url, ao3_work_summary,\
-            ao3_work_status, ao3_work_last_up, ao3_work_published, \
-            ao3_work_length, ao3_work_chapters, ao3_work_rating, \
-            ao3_work_fandom, ao3_work_relationships, ao3_work_characters, \
-            ao3_work_additional_tags, ao3_work_language, ao3_work_kudos, \
-            ao3_work_bookmarks, ao3_work_comments, ao3_work_hits, \
-            ao3_work_warnings, ao3_work_category = ao3_metadata_works(
-                ao3_url)
+        fic = ArchiveOfOurOwn(ao3_url)
+        fic.get_works_metadata()
 
-    elif re.search(r"/series/\b", ao3_url) is not None:
+        if fic.ao3_works_name is None:
+            return {
+                'status': 'Fanfiction Not Found'
+            }
+
+        result = {
+            'story_id': fic.ao3_works_id,
+            'story_name': fic.ao3_works_name,
+            'story_url': fic.BaseUrl,
+            'author': fic.ao3_author_name,
+            'author_url': fic.ao3_author_url,
+            'story_warnings': fic.ao3_works_warnings,
+            'story_category': fic.ao3_works_category,
+            'story_fandom': fic.ao3_works_fandom,
+            'story_relationships': fic.ao3_works_relationships,
+            'story_characters': fic.ao3_works_characters,
+            'story_additional_tags': fic.ao3_works_additional_tags,
+            'story_language': fic.ao3_works_language,
+            'story_summary': fic.ao3_works_summary,
+            'story_status': fic.ao3_works_status,
+            'story_last_updated': fic.ao3_works_last_up,
+            'story_published': fic.ao3_works_published,
+            'story_length': fic.ao3_works_length,
+            'story_chapters': fic.ao3_works_chapters,
+            'story_rating': fic.ao3_works_rating,
+            'story_kudos': fic.ao3_works_kudos,
+            'story_bookmarks': fic.ao3_works_bookmarks,
+            'story_comments': fic.ao3_works_comments,
+            'story_hits': fic.ao3_works_hits
+        }
+
+    elif re.search(r"/series/\b", ao3_url):
 
         # extract series id from the url
         ao3_series_id = str(re.search(r"\d+", ao3_url).group(0))
         ao3_url = "https://archiveofourown.org/series/"+ao3_series_id
 
-        ao3_series_name, ao3_author_name, ao3_author_url, ao3_series_summary, \
-            ao3_series_status, ao3_series_last_up, ao3_series_begun, \
-            ao3_series_length, ao3_series_works_index, ao3_series_works, \
-            ao3_series_bookmarks, ao3_series_fandom = ao3_metadata_series(
-                ao3_url)
+        fic = ArchiveOfOurOwn(ao3_url)
+        fic.get_series_metadata()
 
-        # remove everything after &sa from the url
-        if re.search(r"^(.*?)&", ao3_url) is not None:
-            ao3_url = re.search(
-                r"^(.*?)&", ao3_url).group(1)
-
-        ao3_series_id = (re.search(r"\d+", ao3_url)).group(0)
+        if fic.ao3_series_name is None:
+            return {
+                'status': 'Fanfiction Not Found'
+            }
 
         result = {
-            'series_id': ao3_series_id,
-            'series_name': ao3_series_name,
-            'series_url': ao3_url,
-            'author': ao3_author_name,
-            'author_url': ao3_author_url,
-            'series_fandom': ao3_series_fandom,
-            'series_summary': ao3_series_summary,
-            'series_status': ao3_series_status,
-            'series_last_updated': ao3_series_last_up,
-            'series_begun': ao3_series_begun,
-            'series_length': ao3_series_length,
-            'series_bookmarks': ao3_series_bookmarks,
-            'series_total_works': ao3_series_works,
-            'series_works_index': ao3_series_works_index
+            'series_id': fic.ao3_series_id,
+            'series_name': fic.ao3_series_name,
+            'series_url': fic.BaseUrl,
+            'author': fic.ao3_author_name,
+            'author_url': fic.ao3_author_url,
+            'series_fandom': fic.ao3_series_fandom,
+            'series_summary': fic.ao3_series_summary,
+            'series_status': fic.ao3_series_status,
+            'series_last_updated': fic.ao3_series_last_up,
+            'series_begun': fic.ao3_series_begun,
+            'series_length': fic.ao3_series_length,
+            'series_bookmarks': fic.ao3_series_bookmarks,
+            'series_total_works': fic.ao3_series_works,
+            'series_works_index': fic.ao3_series_works_index
 
         }
-        return result
+    else:
+        result = {
+            'status': 'Fanfiction Not Found'
+        }
 
-    # remove everything after &sa from the url
-    if re.search(r"^(.*?)&", ao3_url) is not None:
-        ao3_url = re.search(
-            r"^(.*?)&", ao3_url).group(1)
-
-    ao3_work_id = (re.search(r"\d+", ao3_url)).group(0)
-
-    result = {
-        'story_id': ao3_work_id,
-        'story_name': ao3_work_name,
-        'story_url': ao3_url,
-        'author': ao3_author_name,
-        'author_url': ao3_author_url,
-        'story_warnings': ao3_work_warnings,
-        'story_category': ao3_work_category,
-        'story_fandom': ao3_work_fandom,
-        'story_relationships': ao3_work_relationships,
-        'story_characters': ao3_work_characters,
-        'story_additional_tags': ao3_work_additional_tags,
-        'story_language': ao3_work_language,
-        'story_summary': ao3_work_summary,
-        'story_status': ao3_work_status,
-        'story_last_updated': ao3_work_last_up,
-        'story_published': ao3_work_published,
-        'story_length': ao3_work_length,
-        'story_chapters': ao3_work_chapters,
-        'story_rating': ao3_work_rating,
-        'story_kudos': ao3_work_kudos,
-        'story_bookmarks': ao3_work_bookmarks,
-        'story_comments': ao3_work_comments,
-        'story_hits': ao3_work_hits
-    }
     return result
 
 
@@ -120,80 +109,35 @@ def ffn_metadata(query):
         ffn_url = re.search(
             URL_VALIDATE, query).group(0)
 
-    scraper = cloudscraper.CloudScraper(delay=3, browser={
-        'browser': 'chrome',
-        'platform': 'windows',
-        'mobile': False,
-        'desktop': True,
-    })
+    fic = FanFictionNet(ffn_url)
+    fic.get_story_metadata()
 
-    time.sleep(2)
-    ffn_page = scraper.get(ffn_url).text
-    ffn_soup = BeautifulSoup(ffn_page, 'html.parser')
-
-    try:
-        ffn_story_name = ffn_soup.find_all('b', 'xcontrast_txt')[
-            0].string.strip()
-
-    except IndexError:
+    if fic.ffn_story_name is None:
         return {
-            'status': 'Not Found'
+            'status': 'Fanfiction Not Found'
         }
 
-    ffn_author_name = ffn_soup.find_all(
-        'a', {'href': re.compile('^/u/\d+/.')})[0].string.strip()
-
-    ffn_author_url = (ffn_soup.find(
-        'div', attrs={'id': 'profile_top'}).find('a', href=True))['href']
-
-    try:
-        ffn_story_summary = ffn_soup.find_all('div', {
-            'style': 'margin-top:2px',
-            'class': 'xcontrast_txt'})[0].string.strip()
-
-    except IndexError:  # Missing summary
-        ffn_story_summary = None
-
-    ffn_story_fandom = ffn_soup.find(
-        'span', attrs={'class': 'lc-left'}).find(
-        'a', attrs={'class': 'xcontrast_txt'}).findNext('a').text
-
-    ffn_story_status, ffn_story_last_up, ffn_story_published, \
-        ffn_story_length, ffn_story_chapters, ffn_story_reviews, \
-        ffn_story_favs, ffn_story_follows, ffn_story_rating, \
-        ffn_story_lang, ffn_story_genre, ffn_story_characters = ffn_process_details(
-            ffn_soup)
-
-    ffn_story_id = re.search(r"\d+", ffn_url).group(0)
-    ffn_author_id = re.search(r"\d+", ffn_author_url).group(0)
-    ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
-
-    # remove everything after &sa from the url
-    if re.search(r"^(.*?)&", ffn_url) is not None:
-        ffn_url = re.search(
-            r"^(.*?)&", ffn_url).group(1)
-
     result = {
-        'story_id': ffn_story_id,
-        'story_name': ffn_story_name,
-        'story_url': ffn_url,
-        'author': ffn_author_name,
-        'author_id': ffn_author_id,
-        'author_url': ffn_author_url,
-        'story_fandom': ffn_story_fandom,
-        'story_summary': ffn_story_summary,
-        'story_rating': ffn_story_rating,
-        'story_language': ffn_story_lang,
-        'story_genre': ffn_story_genre,
-        'story_characters': ffn_story_characters,
-        'story_status': ffn_story_status,
-        'story_last_updated': ffn_story_last_up,
-        'story_published': ffn_story_published,
-        'story_length': ffn_story_length,
-        'story_chapters': ffn_story_chapters,
-        'story_reviews': ffn_story_reviews,
-        'story_favs': ffn_story_favs,
-        'story_follows': ffn_story_follows
+        'story_id': fic.ffn_story_id,
+        'story_name': fic.ffn_story_name,
+        'story_url': fic.BaseUrl,
+        'author': fic.ffn_author_name,
+        'author_id': fic.ffn_author_id,
+        'author_url': fic.ffn_author_url,
+        'story_fandom': fic.ffn_story_fandom,
+        'story_summary': fic.ffn_story_summary,
+        'story_rating': fic.ffn_story_rating,
+        'story_language': fic.ffn_story_lang,
+        'story_genre': fic.ffn_story_genre,
+        'story_characters': fic.ffn_story_characters,
+        'story_status': fic.ffn_story_status,
+        'story_last_updated': fic.ffn_story_last_updated,
+        'story_published': fic.ffn_story_published,
+        'story_length': fic.ffn_story_length,
+        'story_chapters': fic.ffn_story_chapters,
+        'story_reviews': fic.ffn_story_reviews,
+        'story_favs': fic.ffn_story_favs,
+        'story_follows': fic.ffn_story_follows
     }
 
     return result
