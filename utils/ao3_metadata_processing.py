@@ -26,7 +26,7 @@ def ao3_metadata_works(ao3_url):
             'div', attrs={'class': 'summary module'}).find(
             'blockquote', attrs={'class': 'userstuff'}).text
     except AttributeError:  # if summary not found
-        ao3_work_summary = ""
+        ao3_work_summary = None
 
     ao3_work_summary = re.sub(
         r'\s+', ' ', ao3_work_summary)  # removing whitespaces
@@ -39,7 +39,7 @@ def ao3_metadata_works(ao3_url):
         ao3_work_status = ao3_work_status.replace(":", "")
 
     except AttributeError:  # if story status not found
-        ao3_work_status = "Completed"
+        ao3_work_status = None
 
     try:
         ao3_work_last_up = (ao3_soup.find(
@@ -82,7 +82,7 @@ def ao3_metadata_works(ao3_url):
         ao3_work_relationships = ", ".join(ao3_work_relationships)
 
     except AttributeError:
-        ao3_work_relationships = "Not Found"
+        ao3_work_relationships = None
 
     try:  # not found in every story
         ao3_work_characters = [
@@ -94,7 +94,7 @@ def ao3_metadata_works(ao3_url):
         ao3_work_characters = ", ".join(ao3_work_characters)
 
     except AttributeError:
-        ao3_work_characters = "Not Found"
+        ao3_work_characters = None
 
     try:  # not found in every story
         ao3_work_additional_tags = [
@@ -106,7 +106,7 @@ def ao3_metadata_works(ao3_url):
         ao3_work_additional_tags = ", ".join(ao3_work_additional_tags)
 
     except AttributeError:
-        ao3_work_additional_tags = "Not Found"
+        ao3_work_additional_tags = None
 
     ao3_work_language = (ao3_soup.find(
         'dd', attrs={'class': 'language'}).contents[0]).strip()
@@ -116,14 +116,14 @@ def ao3_metadata_works(ao3_url):
             'dl', attrs={'class': 'stats'}).find(
             'dd', attrs={'class': 'kudos'}).contents[0]).strip()
     except AttributeError:
-        ao3_work_kudos = 0
+        ao3_work_kudos = None
 
     try:
         ao3_work_bookmarks = (ao3_soup.find(
             'dl', attrs={'class': 'stats'}).find(
             'dd', attrs={'class': 'bookmarks'}).find('a').contents[0]).strip()
     except AttributeError:
-        ao3_work_bookmarks = 0
+        ao3_work_bookmarks = None
 
     try:
         ao3_work_comments = (ao3_soup.find(
@@ -131,7 +131,7 @@ def ao3_metadata_works(ao3_url):
             'dd', attrs={'class': 'comments'}).contents[0]).strip()
 
     except AttributeError:
-        ao3_work_comments = 0
+        ao3_work_comments = None
 
     try:
         ao3_work_hits = (ao3_soup.find(
@@ -139,7 +139,7 @@ def ao3_metadata_works(ao3_url):
             'dd', attrs={'class': 'hits'}).contents[0]).strip()
 
     except AttributeError:
-        ao3_work_hits = 0
+        ao3_work_hits = None
 
     ao3_work_warnings = (ao3_soup.find(
         'dd', attrs={'class': 'warning tags'}).find('a').contents[0]).strip()
@@ -175,9 +175,12 @@ def ao3_metadata_series(ao3_url):
     ao3_author_name_list = ao3_soup.find(
         'dl', attrs={'class': 'series meta group'}).find('dd').find_all('a')
 
-    ao3_series_summary = (ao3_soup.find(
-        'div', attrs={'class': 'series-show region'}).find(
-        'blockquote', attrs={'class': 'userstuff'}).text).strip()
+    try:
+        ao3_series_summary = (ao3_soup.find(
+            'div', attrs={'class': 'series-show region'}).find(
+            'blockquote', attrs={'class': 'userstuff'}).text).strip()
+    except AttributeError:  # if summary not found
+        ao3_series_summary = None
 
     try:
         ao3_series_status = (ao3_soup.find(
@@ -209,9 +212,13 @@ def ao3_metadata_series(ao3_url):
         'dt', text='Series Begun:').findNext(
         'dd').string.strip()
 
-    ao3_series_length = ao3_soup.find(
-        'dt', text='Words:').findNext(
-        'dd').string.strip()
+    try:
+        ao3_series_length = ao3_soup.find(
+            'dt', text='Words:').findNext(
+            'dd').string.strip()
+
+    except IndexError:  # Missing wordcount
+        ao3_series_length = None
 
     ao3_series_works = ao3_soup.find(
         'dt', text='Works:').findNext(

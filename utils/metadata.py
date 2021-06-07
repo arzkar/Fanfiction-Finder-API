@@ -135,60 +135,65 @@ def ffn_metadata(query):
         ffn_story_name = ffn_soup.find_all('b', 'xcontrast_txt')[
             0].string.strip()
 
-        ffn_author_name = ffn_soup.find_all(
-            'a', {'href': re.compile('^/u/\d+/.')})[0].string.strip()
+    except IndexError:
+        return {
+            'status': 'Not Found'
+        }
 
-        ffn_author_url = (ffn_soup.find(
-            'div', attrs={'id': 'profile_top'}).find('a', href=True))['href']
+    ffn_author_name = ffn_soup.find_all(
+        'a', {'href': re.compile('^/u/\d+/.')})[0].string.strip()
 
+    ffn_author_url = (ffn_soup.find(
+        'div', attrs={'id': 'profile_top'}).find('a', href=True))['href']
+
+    try:
         ffn_story_summary = ffn_soup.find_all('div', {
             'style': 'margin-top:2px',
             'class': 'xcontrast_txt'})[0].string.strip()
 
-        ffn_story_fandom = ffn_soup.find(
-            'span', attrs={'class': 'lc-left'}).find(
-            'a', attrs={'class': 'xcontrast_txt'}).findNext('a').text
+    except IndexError:  # Missing summary
+        ffn_story_summary = None
 
-        ffn_story_status, ffn_story_last_up, ffn_story_published, \
-            ffn_story_length, ffn_story_chapters, ffn_story_reviews, \
-            ffn_story_favs, ffn_story_follows, ffn_story_rating, \
-            ffn_story_lang, ffn_story_genre, ffn_story_characters = ffn_process_details(
-                ffn_soup)
+    ffn_story_fandom = ffn_soup.find(
+        'span', attrs={'class': 'lc-left'}).find(
+        'a', attrs={'class': 'xcontrast_txt'}).findNext('a').text
 
-        ffn_story_id = re.search(r"\d+", ffn_url).group(0)
-        ffn_author_id = re.search(r"\d+", ffn_author_url).group(0)
-        ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
+    ffn_story_status, ffn_story_last_up, ffn_story_published, \
+        ffn_story_length, ffn_story_chapters, ffn_story_reviews, \
+        ffn_story_favs, ffn_story_follows, ffn_story_rating, \
+        ffn_story_lang, ffn_story_genre, ffn_story_characters = ffn_process_details(
+            ffn_soup)
 
-        # remove everything after &sa from the url
-        if re.search(r"^(.*?)&", ffn_url) is not None:
-            ffn_url = re.search(
-                r"^(.*?)&", ffn_url).group(1)
+    ffn_story_id = re.search(r"\d+", ffn_url).group(0)
+    ffn_author_id = re.search(r"\d+", ffn_author_url).group(0)
+    ffn_author_url = "https://www.fanfiction.net"+ffn_author_url
 
-        result = {
-            'story_id': ffn_story_id,
-            'story_name': ffn_story_name,
-            'story_url': ffn_url,
-            'author': ffn_author_name,
-            'author_id': ffn_author_id,
-            'author_url': ffn_author_url,
-            'story_fandom': ffn_story_fandom,
-            'story_summary': ffn_story_summary,
-            'story_rating': ffn_story_rating,
-            'story_language': ffn_story_lang,
-            'story_genre': ffn_story_genre,
-            'story_characters': ffn_story_characters,
-            'story_status': ffn_story_status,
-            'story_last_updated': ffn_story_last_up,
-            'story_published': ffn_story_published,
-            'story_length': ffn_story_length,
-            'story_chapters': ffn_story_chapters,
-            'story_reviews': ffn_story_reviews,
-            'story_favs': ffn_story_favs,
-            'story_follows': ffn_story_follows
-        }
+    # remove everything after &sa from the url
+    if re.search(r"^(.*?)&", ffn_url) is not None:
+        ffn_url = re.search(
+            r"^(.*?)&", ffn_url).group(1)
 
-    except IndexError:
-        result = {
-            'status': 'Connection Error'
-        }
+    result = {
+        'story_id': ffn_story_id,
+        'story_name': ffn_story_name,
+        'story_url': ffn_url,
+        'author': ffn_author_name,
+        'author_id': ffn_author_id,
+        'author_url': ffn_author_url,
+        'story_fandom': ffn_story_fandom,
+        'story_summary': ffn_story_summary,
+        'story_rating': ffn_story_rating,
+        'story_language': ffn_story_lang,
+        'story_genre': ffn_story_genre,
+        'story_characters': ffn_story_characters,
+        'story_status': ffn_story_status,
+        'story_last_updated': ffn_story_last_up,
+        'story_published': ffn_story_published,
+        'story_length': ffn_story_length,
+        'story_chapters': ffn_story_chapters,
+        'story_reviews': ffn_story_reviews,
+        'story_favs': ffn_story_favs,
+        'story_follows': ffn_story_follows
+    }
+
     return result
