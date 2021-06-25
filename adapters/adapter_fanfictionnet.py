@@ -1,9 +1,8 @@
 import requests
 import re
-
-
 from datetime import datetime
 from bs4 import BeautifulSoup
+import cloudscraper
 from loguru import logger
 
 URL_VALIDATE = r"(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]+-?)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:/[^\s]*)?"
@@ -17,13 +16,18 @@ class FanFictionNet:
 
         if re.search(URL_VALIDATE, self.BaseUrl):
 
-            self.session = requests.Session()
+            self.scraper = cloudscraper.CloudScraper(
+                delay=2, browser={
+                    'browser': 'chrome',
+                    'platform': 'windows',
+                    'mobile': False,
+                    'desktop': True,
+                }
+            )
 
-            response = self.session.get(self.BaseUrl)
+            response = self.scraper.get(self.BaseUrl)
 
-            logger.info(
-                f"Processing {self.BaseUrl} ")
-
+            logger.debug(f"GET: {response.status_code}: {response.url}")
             ffn_soup = BeautifulSoup(response.content, 'html.parser')
 
             try:
