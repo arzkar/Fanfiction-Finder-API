@@ -10,36 +10,31 @@ def find_fic(query):
     """ Command to search and find the fanfiction by scraping google
     """
     msg = list(query.lower())
+    time.sleep(2)  # to circumvent rate-limit
 
-    whitelist = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'é',
-                 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '!', '?', ' ', '.', ';', ',', '"', "'", '`', '…', '*', '-', ':', '/', '%', '#']
+    if re.search(r"^ao3\b", query, re.IGNORECASE) is not None:
+        msg = query.replace("ao3", "")
+        msg = query.replace("ffn", "")
+        result = ao3_metadata(msg)
+        return result
 
-    if all(elem in whitelist for elem in msg):  # if msg in whitelist
-        if re.search(r"^ao3\b", query, re.IGNORECASE) is not None:
-            msg = query.replace("ao3", "")
-            msg = query.replace("ffn", "")
+    elif re.search(r"^ffn\b", query, re.IGNORECASE) is not None:
+        msg = query.replace("ffn", "")
+        msg = query.replace("ao3", "")
+        result = ffn_metadata(msg)
+        return result
 
-            time.sleep(2)
-            result = ao3_metadata(msg)
+    elif re.search(URL_VALIDATE, query) is not None:
+
+        url_found = (
+            re.search(URL_VALIDATE, query, re.IGNORECASE)).group(0)
+
+        if re.search(r"fanfiction.net\b",  url_found) is not None:
+            result = ffn_metadata(url_found)
+
             return result
 
-        elif re.search(r"^ffn\b", query, re.IGNORECASE) is not None:
-            msg = query.replace("ffn", "")
-            msg = query.replace("ao3", "")
-            result = ffn_metadata(msg)
+        if re.search(r"archiveofourown.org\b", url_found) is not None:
+            result = ao3_metadata(url_found)
+
             return result
-
-        elif re.search(URL_VALIDATE, query) is not None:
-
-            url_found = (
-                re.search(URL_VALIDATE, query, re.IGNORECASE)).group(0)
-
-            if re.search(r"fanfiction.net\b",  url_found) is not None:
-                result = ffn_metadata(url_found)
-
-                return result
-
-            if re.search(r"archiveofourown.org\b", url_found) is not None:
-                result = ao3_metadata(url_found)
-
-                return result

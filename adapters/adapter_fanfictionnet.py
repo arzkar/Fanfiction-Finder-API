@@ -90,9 +90,9 @@ class FanFictionNet:
 
                     # change formatting
                     self.ffn_story_last_updated = self.ffn_story_last_updated.strftime(
-                        r'%-d %b, %Y ')
+                        r'%Y-%m-%d')
                     self.ffn_story_published = self.ffn_story_published.strftime(
-                        r'%-d %b, %Y ')
+                        r'%Y-%m-%d')
 
                     break  # if found, exit the loop to prevent overwriting of the variable
 
