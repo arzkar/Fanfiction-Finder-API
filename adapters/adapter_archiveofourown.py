@@ -23,7 +23,7 @@ class ArchiveOfOurOwn:
         if re.search(URL_VALIDATE, self.BaseUrl):
 
             logger.info(
-                f"Processing {self.BaseUrl} ")
+                f"Processing {self.BaseUrl}")
 
             self.session = requests.Session()
 

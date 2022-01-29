@@ -16,6 +16,9 @@ class FanFictionNet:
 
         if re.search(URL_VALIDATE, self.BaseUrl):
 
+            logger.info(
+                f"Processing {self.BaseUrl}")
+
             self.scraper = cloudscraper.CloudScraper(
                 delay=2, browser={
                     'browser': 'chrome',
