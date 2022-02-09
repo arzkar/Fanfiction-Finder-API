@@ -1,6 +1,6 @@
 <h1 align="center">Fanfiction Finder API</h1>
 
-[![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This API can scrape both [ffnet](https://www.fanfiction.net/) and [ao3](https://archiveofourown.org/) fanfiction metadata. Currently it can search for ao3 works, series and ffnet stories. <br>
 
