@@ -24,7 +24,7 @@ URL_VALIDATE = r"(?:(?:https?|ftp)://)(?:\S+(?::\S*)?@)?(?:(?:[1-9]\d?|1\d\d|2[0
 
 params = {
     'view_adult': 'true',
-    'view_full_work': 'true'
+    # 'view_full_work': 'true'
 }
 
 
