@@ -204,7 +204,7 @@ class ArchiveOfOurOwn:
                 'dd', attrs={'class': 'category tags'})
                 .find('a').contents[0]).strip()
 
-            self.ao3_works_length = "{:,}".format(int(self.ao3_works_length))
+            self.ao3_works_length = "{:,}".format(int(str(self.ao3_works_length).replace(",","")))
             self.ao3_works_chapters = re.search(
                 r"\d+", self.ao3_works_chapters).group(0)
 
